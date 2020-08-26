@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devstart": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +17,8 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "pug": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
