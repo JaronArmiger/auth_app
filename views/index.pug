@@ -3,5 +3,17 @@ html(lang='en')
   head
     title
   body
-    h1 fuck
-    a(href='/sign-up') sign up
+    if user
+      h1 sup #{user.username}
+      a(href='/log-out') Log Out
+    else
+      h1 log in
+      form(method='POST' action='/log-in')
+        div
+          label(for='username') Username:
+          input#username(type='text' name='username' placeholder='username')
+        div
+          label(for='password') Password:
+          input#password(type='password' name='password')
+        button Log in
+      a(href='/sign-up') sign up
