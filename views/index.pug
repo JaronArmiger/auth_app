@@ -3,9 +3,10 @@ html(lang='en')
   head
     title
   body
-    if user
-      h1 sup #{user.username}
+    if currentUser
+      h1 sup #{currentUser.username}
       a(href='/log-out') Log Out
+      p #{currentUser.password}
     else
       h1 log in
       form(method='POST' action='/log-in')

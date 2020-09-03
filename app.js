@@ -9,6 +9,7 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const validator = require('express-validator');
+const bcrypt = require('bcryptjs');
 const User = require('./models/user');
 
 const mongoose = require('mongoose');
@@ -36,9 +37,13 @@ passport.use(
       if (!user) {
       	return done(null, false, { msg: 'Incorrect username' });
       };
-      if (user.password !== password) {
-      	return done(null, false, { msg: 'Incorrect password' });
-      };
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) {
+          return done(null, user);
+        } else {
+          return done(null, false, {msg: "Incorrect password"});
+        }
+      });
       return done(null, user);
     });
   })
@@ -58,14 +63,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
+app.use(function(req, res, next) {
+  res.locals.currentUser = req.user;
+  next();
+});
+
 app.get('/', (req, res) => { 
-  res.render('index', { user: req.user });
+  res.render('index');
 });
 app.post('/log-in', passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/'
   })
 );
+app.get('/log-out', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
 
 app.get('/sign-up', (req, res) => {
   res.render('sign-up-form');
@@ -77,15 +91,16 @@ app.post('/sign-up', [
   validator.sanitizeBody('password').escape(),
 
   (req, res, next) => {
-  	const user = new User({
-  	  username: req.body.username,
-  	  password: req.body.password
-  	}).save(err => {
-      if (err) {
-      	return next(err);
-      }
-      res.redirect('/');
-  	});
+    bcrypt.hash(req.body.password, 10, (err, hashed) => {
+        if (err) return next(err);
+        const user = new User({
+          username: req.body.username,
+          password: hashed
+        }).save(err => {
+          if (err) return next(err);
+          res.redirect("/");
+        });
+    });
   }
 ]);
 
